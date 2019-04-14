@@ -9,7 +9,7 @@ def simulate_distributions(distributions):
     Simulate multiple distributions in parallel.
     """
     from joblib import Parallel, delayed
-    Parallel(n_jobs=4)(delayed(simulate)(distribution) for distribution in distributions)
+    Parallel(n_jobs=-1)(delayed(simulate)(distribution) for distribution in distributions)
 
 
 def simulate(distribution):
@@ -35,7 +35,7 @@ def simulate_parallel(distribution):
     """
     from joblib import Parallel, delayed
     num_bids = [pow(10, i)*j for i in range(1, 4) for j in range(1, 10, 3)] + [10000]
-    Parallel(n_jobs=4)(delayed(evaluate)(distribution, n, 10) for n in num_bids)
+    Parallel(n_jobs=-1)(delayed(evaluate)(distribution, n, 20) for n in num_bids)
 
 
 def evaluate(dis, n, iterations):
@@ -45,7 +45,7 @@ def evaluate(dis, n, iterations):
     for i in range(iterations):
         b = sorted(dis(n), reverse=True)
         _, F = opt(b)
-        dsot += DSOT(b) / F
+        dsot += DSOT(b, dualPrice=True) / F
         scs += SCS(b) / F
         dot += DOT(b) / F
     dsot, scs, dot = dsot / iterations, scs / iterations, dot / iterations
@@ -67,7 +67,7 @@ def opt(b):
 def DOT(b):
     revenue = 0
     for i, x in enumerate(b):
-        b_ = np.delete(b, i)
+        b_ = b[:i] + b[i+1:]
         price, _ = opt(b_)
         if x >= price:
             revenue += price
@@ -124,9 +124,9 @@ def partition(b):
 
 
 def main():
-    distributions = [equal_revenue_bids, normal_bids, uniform_bids]
-    # simulate_parallel(equal_revenue_bids)
-    simulate_distributions(distributions)
+    # distributions = [equal_revenue_bids, normal_bids, uniform_bids]
+    # simulate_distributions(distributions)
+    simulate_parallel(equal_revenue_bids)
     return
 
 
