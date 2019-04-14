@@ -1,5 +1,6 @@
 import random
 import time
+import math
 from distribution import *
 
 
@@ -88,27 +89,25 @@ def DSOT(b, dualPrice = False):
 
 def SCS(b, dualPrice = False):
     x, y = partition(b)
-    _, x_cost = opt(y)
-    _, y_cost = opt(x)
+    x_price, x_cost = opt(y)
+    y_price, y_cost = opt(x)
 
     # x = sorted(x, reverse=True)
     # y = sorted(y, reverse=True)
 
     x_revenue = 0
     for i, bid in enumerate(x):
-        x_revenue = (i + 1) * bid
-        if x_revenue >= x_cost:
+        if (i + 1) * bid >= x_cost:
             x_revenue = x_cost
             break
 
     y_revenue = 0
     for i, bid in enumerate(y):
-        y_revenue = (i + 1) * bid
-        if y_revenue >= y_cost:
+        if (i + 1) * bid >= y_cost:
             y_revenue = y_cost
             break
 
-    if dualPrice:
+    if dualPrice or math.isclose(x_price, y_price, rel_tol=1e-6):
         return x_revenue + y_revenue
     else:
         return max(x_revenue, y_revenue)
